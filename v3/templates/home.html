@@ -1,10 +1,14 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}  {# Extend the base layout (includes sidebar, header, CSS, JS) #}
+
+{% block content %}
 <div class="home-container">
+  <!-- Page Heading -->
   <h2 class="text-center mb-4">🏠 Welcome to CampusKart</h2>
 
-  <!-- ROTATING BANNER -->
+  <!-- ================== ROTATING BANNER ================== -->
   <div class="banner-container">
     <div class="banner-track">
+      <!-- Banner images fetched from Flask static folder -->
       <img
         src="{{ url_for('static', filename='images/banners/banner1.jpg') }}"
         alt="Banner 1"
@@ -20,40 +24,48 @@
     </div>
   </div>
 
+  <!-- Instruction / informational text -->
   <p class="text-center mt-5 text-muted">
     Use the Search tab to browse items or Sell tab to list your own!
   </p>
 </div>
 
-<!-- BANNER ANIMATION -->
+<!-- ================== BANNER ANIMATION ================== -->
 <style>
+  /* Container for the banner: hides overflow and adds rounded corners */
   .banner-container {
     width: 100%;
     overflow: hidden;
     border-radius: 10px;
   }
+
+  /* Banner track: flex container holding all images side by side */
   .banner-track {
     display: flex;
-    width: 300%;
-    animation: slide 12s infinite linear;
+    width: 300%; /* 3 images → 100% each */
+    animation: slide 12s infinite linear; /* continuous sliding animation */
   }
+
+  /* Style for each banner image */
   .banner-track img {
-    width: 100%;
-    height: 300px;
-    object-fit: cover;
+    width: 100%;      /* Each image takes full width of container */
+    height: 300px;    /* Fixed height */
+    object-fit: cover; /* Ensures image covers area without distortion */
   }
+
+  /* Keyframes for sliding animation */
   @keyframes slide {
     0% {
-      transform: translateX(0);
+      transform: translateX(0); /* Start at first image */
     }
     33% {
-      transform: translateX(-100%);
+      transform: translateX(-100%); /* Move to second image */
     }
     66% {
-      transform: translateX(-200%);
+      transform: translateX(-200%); /* Move to third image */
     }
     100% {
-      transform: translateX(0);
+      transform: translateX(0); /* Loop back to first image */
     }
   }
 </style>

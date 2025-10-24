@@ -1,65 +1,70 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}  {# Inherit layout, sidebar, CSS, and JS from base template #}
+
+{% block content %}
 <div class="form-container" id="payment-section">
+  <!-- Page heading -->
   <h2 class="text-center mb-3">💳 Choose Your Payment Method</h2>
   <p class="text-center text-muted mb-4">
     Securely complete your purchase and get your pickup OTP.
   </p>
 
-  <!-- ORDER SUMMARY -->
+  <!-- ================== ORDER SUMMARY ================== -->
   <div class="order-summary mb-4">
     <h4>Order Summary</h4>
     {% if order %}
+    <!-- Single product checkout -->
     <p><strong>Item:</strong> {{ order.item_name }}</p>
     <p><strong>Price:</strong> ₹{{ order.price }}</p>
     <p><strong>Order ID:</strong> {{ order.order_id }}</p>
     {% else %}
+    <!-- Mock checkout summary for cart-based checkout -->
     <p>This is a mock checkout summary (for testing).</p>
     <p><strong>Item:</strong> Mixed Cart</p>
     <p><strong>Total:</strong> ₹<span id="mock-total">0.00</span></p>
     {% endif %}
   </div>
 
-  <!-- PAYMENT OPTIONS -->
+  <!-- ================== PAYMENT OPTIONS ================== -->
   <div class="payment-options text-center">
     <button class="btn w-100 mb-3" id="cod-btn">💵 Cash on Delivery</button>
     <button class="btn w-100" id="razor-btn">💳 Pay via Razorpay (Mock)</button>
   </div>
 
-  <!-- STATUS DISPLAY -->
+  <!-- ================== STATUS DISPLAY ================== -->
   <div id="payment-status" class="mt-4 text-center" style="display: none">
-    <p id="status-text" class="fw-bold"></p>
+    <p id="status-text" class="fw-bold"></p>  {# Status text updated dynamically by JS #}
   </div>
 </div>
 
 <script>
   /* =======================================================
-   PAYMENTS PAGE FRONTEND LOGIC
-   - Handles COD and Mock Razorpay flows
-   - Confirms order and generates pickup OTP
-   - Redirects to Orders page
-   ======================================================= */
+     PAYMENTS PAGE FRONTEND LOGIC
+     - Handles COD and Mock Razorpay flows
+     - Confirms order and generates pickup OTP
+     - Redirects to Orders page after confirmation
+  ======================================================= */
 
   document.addEventListener("DOMContentLoaded", () => {
-    const codBtn = document.getElementById("cod-btn");
-    const razorBtn = document.getElementById("razor-btn");
-    const statusDiv = document.getElementById("payment-status");
-    const statusText = document.getElementById("status-text");
+    const codBtn = document.getElementById("cod-btn");       // COD button
+    const razorBtn = document.getElementById("razor-btn");   // Razorpay button
+    const statusDiv = document.getElementById("payment-status"); // Div to display status
+    const statusText = document.getElementById("status-text");   // Status message text
 
-    // If total exists in localStorage (cart page)
+    // ================== MOCK CART TOTAL ==================
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const mockTotal = cart.reduce((t, i) => t + i.price * i.qty, 0);
     const mockTotalSpan = document.getElementById("mock-total");
     if (mockTotalSpan) mockTotalSpan.textContent = mockTotal.toFixed(2);
 
-    // --- CASH ON DELIVERY FLOW ---
+    // ================== CASH ON DELIVERY FLOW ==================
     codBtn.addEventListener("click", () => {
-      statusDiv.style.display = "block";
+      statusDiv.style.display = "block"; // Show status message
       statusText.textContent = "Processing your Cash on Delivery order...";
       statusText.style.color = "var(--coffee-medium)";
-      simulatePayment("COD");
+      simulatePayment("COD"); // Trigger mock payment flow
     });
 
-    // --- MOCK RAZORPAY FLOW ---
+    // ================== MOCK RAZORPAY FLOW ==================
     razorBtn.addEventListener("click", () => {
       statusDiv.style.display = "block";
       statusText.textContent = "Redirecting to Razorpay mock window...";
@@ -73,21 +78,25 @@
       }, 1500);
     });
 
-    // --- MOCK PAYMENT HANDLER ---
+    // ================== MOCK PAYMENT HANDLER ==================
     function simulatePayment(mode) {
-      // Create random 4-digit OTP
+      // Generate random 4-digit OTP
       const otp = Math.floor(1000 + Math.random() * 9000);
+      // Optional hashed version (for testing or logging)
       const hashed = btoa(otp.toString()).slice(0, 8);
 
       setTimeout(() => {
+        // Clear the cart after payment
         localStorage.removeItem("cart");
+
+        // Display OTP and payment confirmation
         statusText.innerHTML = `
         ✅ Order confirmed!<br>
         <strong>Pickup OTP:</strong> ${otp}<br>
         <small>(Hashed: ${hashed})</small><br>
         <span style="color:gray;">Payment Mode: ${mode}</span><br>
         Redirecting to Orders...
-      `;
+        `;
 
         // Redirect to Orders page after 3 seconds
         setTimeout(() => {

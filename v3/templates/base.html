@@ -2,22 +2,34 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Ensure proper rendering and touch zooming on mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CampusKart</title>
+    
+    <title>CampusKart</title>  <!-- Page title displayed in the browser tab -->
+
+    <!-- Link to external CSS file stored in Flask static folder -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/style.css') }}"
     />
+
+    <!-- Google Fonts: Poppins -->
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
   </head>
+
   <body>
     <div style="display: flex; min-height: 100vh; width: 100%">
-      <!-- SIDEBAR -->
+      <!-- Flex container to hold sidebar and main content -->
+
+      <!-- ================= SIDEBAR ================= -->
       <div class="sidebar">
+        <!-- Logo at the top of the sidebar -->
         <div class="logo">CampusKart</div>
+
+        <!-- Navigation menu -->
         <nav class="nav-menu">
           <a href="{{ url_for('home') }}">Home</a>
           <a href="{{ url_for('search') }}">Search</a>
@@ -26,50 +38,89 @@
           <a href="{{ url_for('orders') }}">My Orders</a>
           <a href="{{ url_for('profile') }}">Profile</a>
 
-          <!-- NEW: Admin Button -->
+          <!-- Admin Panel button (protected by password prompt) -->
           <a href="#" id="admin-button">Admin Panel</a>
 
+          <!-- Logout link -->
           <a href="{{ url_for('logout') }}" class="logout">Logout</a>
         </nav>
       </div>
 
-      <!-- MAIN CONTENT -->
+      <!-- ================= MAIN CONTENT ================= -->
       <main class="main-content">
-        <!-- Flash Messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %} {% if
-        messages %}
-        <div class="flash-container">
-          {% for category, message in messages %}
-          <div class="flash flash-{{ category }}">{{ message }}</div>
-          {% endfor %}
-        </div>
-        {% endif %} {% endwith %} {% block content %}
-        <!-- Page-specific content will be inserted here -->
-        {% endblock %}
+        <!-- Flash messages for success, error, or info notifications -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Page-specific content will be inserted here via block content -->
+        {% block content %}{% endblock %}
       </main>
     </div>
 
+    <!-- Link to external JavaScript file -->
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <!-- Placeholder for page-specific scripts -->
     {% block scripts %}{% endblock %}
 
+    <!-- ================= Admin Button JavaScript ================= -->
     <script>
-      // NEW: JavaScript for the admin password prompt
+      // Select the Admin Panel button by ID and attach a click event listener
       document
         .getElementById("admin-button")
         .addEventListener("click", function (event) {
-          event.preventDefault();
+          event.preventDefault();  // Prevent default link navigation
+
+          // Prompt user to enter the admin password
           const password = prompt("Please enter the admin password:");
 
-          // This is the hardcoded password the examiner can test with.
+          // Hardcoded admin password for demonstration/testing
           const ADMIN_PASSWORD = "admin";
 
           if (password === ADMIN_PASSWORD) {
-            // If the password is correct, redirect to the admin page.
+            // If password is correct, redirect to the admin dashboard
             window.location.href = "{{ url_for('admin_dashboard') }}";
           } else if (password) {
-            // if they entered something but it was wrong
+            // If user entered a wrong password, show alert
             alert("Incorrect password.");
           }
+          // If user cancels the prompt, do nothing
+          /**
+           *Flask/Jinja2 integration:
+
+{{ url_for('static', filename='css/style.css') }} → Generates the correct URL for static files.
+
+{% block content %}{% endblock %} → Placeholder for page-specific content when extending this layout.
+
+{% with messages = get_flashed_messages(with_categories=true) %} → Handles Flask flash messages with categories for styling (like success, error).
+
+Sidebar:
+
+Contains links for main navigation.
+
+Admin Panel is protected by a JS prompt (for demonstration; not secure for production).
+
+Main content:
+
+Uses flexbox for responsive layout alongside the sidebar.
+
+Flash messages display notifications dynamically.
+
+Admin Button JS:
+
+Simple client-side password check (prompt) before redirecting.
+
+Uses hardcoded password admin for testing.
+
+Extensibility:
+
+{% block scripts %}{% endblock %} allows adding page-specific JavaScript in child template /*/
         });
     </script>
   </body>

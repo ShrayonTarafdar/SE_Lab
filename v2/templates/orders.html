@@ -1,0 +1,60 @@
+{% extends "base.html" %} {% block content %}
+<style>
+  /* Add a style for cancelled orders to make them distinct */
+  .status-cancelled {
+    color: #b71c1c;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+</style>
+<div class="orders-container">
+  <h2 class="mb-4">📜 Your Orders</h2>
+  {% if orders and orders|length > 0 %}
+  <div class="card-grid">
+    {% for o in orders %}
+    <div class="card">
+      <div class="card-content">
+        <h4>{{ o.item_name }}</h4>
+        <p>Order ID: <b>{{ o.order_id }}</b></p>
+        <p>Price: ₹{{ "%.2f"|format(o.price) }}</p>
+        <p>
+          Status:
+          <span
+            class="order-status status-{{ o.status|replace(' ', '_')|lower }}"
+          >
+            {{ o.status|replace('_', ' ')|capitalize }}
+          </span>
+        </p>
+        <small class="text-muted"
+          >Placed on {{ o.created_at.split(' ')[0] if o.created_at else 'N/A'
+          }}</small
+        >
+
+        <!-- FEATURE 5: "Mark Received" button appears for items in transit -->
+        {% if o.status == 'in_transit' or o.status == 'ready_for_pickup' %}
+        <button
+          class="btn mt-3 btn-mark-received"
+          data-order-id="{{ o.order_id }}"
+        >
+          Mark Received
+        </button>
+        {% endif %}
+
+        <!-- The existing cancel button logic remains -->
+        {% if o.status in ['pending', 'in_transit', 'ready_for_pickup'] %}
+        <button
+          class="btn btn-outline mt-3 btn-cancel-order"
+          data-order-id="{{ o.order_id }}"
+        >
+          Cancel Order
+        </button>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">No orders yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

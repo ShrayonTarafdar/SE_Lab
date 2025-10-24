@@ -1,0 +1,58 @@
+{% extends "base.html" %} {% block content %}
+<div class="orders-container">
+  <h2 class="mb-4">📜 Your Orders</h2>
+  {% if orders and orders|length > 0 %}
+  <div class="card-grid">
+    {% for o in orders %}
+    <div class="card">
+      <div class="card-content">
+        <h4>{{ o.item_name }}</h4>
+        <p>Order ID: <b>{{ o.order_id }}</b></p>
+        <p>OTP Code: <code>{{ o.hashed_otp }}</code></p>
+        <p>Price: ₹{{ "%.2f"|format(o.price) }}</p>
+        <p>
+          Status:
+          <span class="order-status status-{{ o.status|replace(' ', '_') }}">
+            {{ o.status|replace('_', ' ')|capitalize }}
+          </span>
+        </p>
+        <small class="text-muted">Placed on {{ o.created_at }}</small>
+
+        {% if o.status != 'completed' %}
+        <button class="btn mt-3 mark-received" data-order="{{ o.order_id }}">
+          Mark Received
+        </button>
+        {% else %}
+        <p class="text-muted mt-3">✔ Received</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">No orders yet.</p>
+  {% endif %}
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".mark-received").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const orderId = btn.dataset.order;
+        if (!confirm("Confirm you’ve received this item?")) return;
+        fetch(`/orders/received/${orderId}`, { method: "POST" })
+          .then((r) => r.json())
+          .then((resp) => {
+            if (resp.ok) {
+              alert("Thanks! Order marked as received.");
+              location.reload();
+            } else {
+              alert(resp.error || "Failed to update order.");
+            }
+          })
+          .catch(() => alert("Network error."));
+      });
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "base.html" %} {% block content %}
+<div class="sell-container">
+  <h2 class="mb-4 text-center">📦 Sell an Item</h2>
+
+  <!-- SELL FORM -->
+  <form
+    action="{{ url_for('sell') }}"
+    method="POST"
+    enctype="multipart/form-data"
+    class="sell-form needs-validation"
+  >
+    <label for="name">Item Name</label>
+    <input
+      type="text"
+      id="name"
+      name="name"
+      placeholder="Enter item name"
+      required
+    />
+
+    <label for="description">Description</label>
+    <textarea
+      id="description"
+      name="description"
+      placeholder="Describe your item..."
+      rows="3"
+      required
+    ></textarea>
+
+    <label for="price">Price (₹)</label>
+    <input type="number" id="price" name="price" step="0.01" min="1" required />
+
+    <label for="category">Category</label>
+    <select id="category" name="category" required>
+      <option value="">Select Category</option>
+      <option value="Books">Books</option>
+      <option value="Electronics">Electronics</option>
+      <option value="Stationery">Stationery</option>
+      <option value="Furniture">Furniture</option>
+      <option value="Miscellaneous">Miscellaneous</option>
+    </select>
+
+    <label for="quantity">Quantity</label>
+    <input
+      type="number"
+      id="quantity"
+      name="quantity"
+      value="1"
+      min="1"
+      required
+    />
+
+    <label for="image">Upload Image</label>
+    <input type="file" id="image" name="image" accept="image/*" />
+
+    <button type="submit" class="btn mt-3 w-100">List Item</button>
+  </form>
+
+  <hr class="mt-5 mb-4" />
+
+  <!-- CURRENT LISTINGS -->
+  <h3 class="mb-3">Your Listings</h3>
+  {% if listings and listings|length > 0 %}
+  <div class="card-grid">
+    {% for item in listings %}
+    <div class="card">
+      <img
+        src="{{ item.image_url or url_for('static', filename='images/banners/banner1.jpg') }}"
+        alt="{{ item.name }}"
+      />
+      <div class="card-content">
+        <h4>{{ item.name }}</h4>
+        <p class="text-muted">{{ item.description }}</p>
+        <p>Price: ₹{{ "%.2f"|format(item.price) }}</p>
+        <p>Available: {{ item.quantity or 0 }}</p>
+        {% if (item.quantity or 0) <= 0 %}
+        <p class="text-danger">Status: Sold</p>
+        {% else %}
+        <p class="text-success">Status: Available</p>
+        {% endif %}
+        <button
+          class="btn-outline mt-2 delete-item"
+          data-id="{{ item.item_id }}"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">You have not listed any items yet.</p>
+  {% endif %}
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".delete-item").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.id;
+        if (confirm("Are you sure you want to delete this item?")) {
+          fetch(`/sell/delete/${id}`, { method: "POST" })
+            .then((res) => {
+              if (res.status === 204) {
+                alert("Item deleted successfully!");
+                location.reload();
+              } else {
+                return res
+                  .json()
+                  .then((r) => alert(r.error || "Delete failed"));
+              }
+            })
+            .catch((err) => alert("Error deleting item."));
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

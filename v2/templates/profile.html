@@ -1,0 +1,83 @@
+{% extends "base.html" %} {% block content %}
+<div class="profile-container">
+  <h2 class="mb-4 text-center">👤 Your Profile</h2>
+
+  <!-- PROFILE HEADER -->
+  <div class="profile-header">
+    <!-- FIX 1: Use url_for('static', ...) to correctly generate the image path -->
+    <img
+      src="{{ url_for('static', filename=user.profile_img) if user.profile_img else url_for('static', filename='images/default_profile.png') }}"
+      alt="Profile Picture"
+      style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover"
+    />
+    <div>
+      <h4>{{ user.name }}</h4>
+      <p class="mb-1 text-muted">{{ user.email }}</p>
+      <p class="small text-muted">
+        Member since: {{ user.created_at.split(' ')[0] if user.created_at else
+        'N/A' }}
+      </p>
+    </div>
+  </div>
+
+  <div class="text-end mb-4">
+    <a href="{{ url_for('profile_edit_view') }}" class="btn-outline"
+      >Edit Profile</a
+    >
+  </div>
+  <hr />
+
+  <!-- PURCHASE HISTORY -->
+  <h4 class="mt-4 mb-3">🛍️ Items Bought</h4>
+  {% if bought_items and bought_items|length > 0 %}
+  <div class="card-grid">
+    {% for o in bought_items %}
+    <div class="card">
+      <div class="card-content">
+        <p class="card-title">{{ o.item_name }}</p>
+        <p class="card-price">₹{{ "%.2f"|format(o.price or 0) }}</p>
+        <p class="text-muted small mb-1">Order ID: {{ o.order_id }}</p>
+        <p class="small">
+          Status:
+          <span
+            class="order-status status-{{ (o.status or 'pending')|replace(' ', '_')|lower }}"
+          >
+            {{ (o.status or 'pending')|replace('_', ' ')|capitalize }}
+          </span>
+        </p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">You haven’t purchased any items yet.</p>
+  {% endif %}
+
+  <!-- SALES HISTORY -->
+  <h4 class="mt-4 mb-3">💼 Items Sold</h4>
+  {% if sold_items and sold_items|length > 0 %}
+  <div class="card-grid">
+    {% for item in sold_items %}
+    <div class="card">
+      <div class="card-content">
+        <p class="card-title">{{ item.name }}</p>
+        <p class="card-price">₹{{ "%.2f"|format(item.price) }}</p>
+        <!-- FIX 2 & 4: Display the buyer's name. If item is not sold yet, buyer_name will be None. -->
+        <p class="text-muted small mb-1">
+          Buyer: {{ item.buyer_name or 'Not yet sold' }}
+        </p>
+        <p class="small text-muted">
+          Status:
+          <span class="order-status status-{{ item.status|lower }}"
+            >{{ item.status|capitalize }}</span
+          >
+        </p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">You haven’t sold any items yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

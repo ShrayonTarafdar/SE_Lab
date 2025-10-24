@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="search-container">
+  <h2 class="mb-4">🔍 Search Items</h2>
+
+  <!-- SEARCH BAR -->
+  <form method="get" action="{{ url_for('search') }}" class="search-form">
+    <div class="search-bar">
+      <input
+        type="text"
+        id="search-input"
+        name="q"
+        placeholder="Search items..."
+        value="{{ query or '' }}"
+      />
+      <select id="filter-category" name="cat">
+        <option value="" {{ '' == (selected_cat or '') and 'selected' or '' }}>All Categories</option>
+        <option value="Books" {{ 'books' == (selected_cat or '') and 'selected' or '' }}>Books</option>
+        <option value="Electronics" {{ 'electronics' == (selected_cat or '') and 'selected' or '' }}>Electronics</option>
+        <option value="Stationery" {{ 'stationery' == (selected_cat or '') and 'selected' or '' }}>Stationery</option>
+        <option value="Furniture" {{ 'furniture' == (selected_cat or '') and 'selected' or '' }}>Furniture</option>
+        <option value="Miscellaneous" {{ 'miscellaneous' == (selected_cat or '') and 'selected' or '' }}>Miscellaneous</option>
+      </select>
+      <button type="submit" class="btn">Search</button>
+    </div>
+  </form>
+
+  {% if items|length > 0 %}
+  <div class="card-grid mt-4">
+    {% for item in items %}
+    <div class="card item-card" data-id="{{ item.item_id }}" data-name="{{ item.name }}" data-price="{{ item.price }}">
+      <img src="{{ item.image_url or url_for('static', filename='images/banners/banner1.jpg') }}" alt="{{ item.name }}">
+      <div class="card-content">
+        <h4>{{ item.name }}</h4>
+        <p class="text-muted">{{ item.category }}</p>
+        <p>{{ item.description or '' }}</p>
+        <p class="card-price">₹{{ "%.2f"|format(item.price) }}</p>
+        <p class="small text-muted">Available: {{ item.quantity or 0 }}</p>
+
+        {% if item.quantity|int > 0 %}
+        <div class="qty-control">
+          <button class="qty-btn minus" data-id="{{ item.item_id }}">-</button>
+          <span class="qty-count" id="qty-{{ item.item_id }}">1</span>
+          <button class="qty-btn plus" data-id="{{ item.item_id }}">+</button>
+        </div>
+        <button class="btn add-to-cart" data-id="{{ item.item_id }}" data-name="{{ item.name }}" data-price="{{ item.price }}">
+          Add to Cart
+        </button>
+        {% else %}
+        <button class="btn btn-outline" disabled>Sold Out</button>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted mt-4">No items found. Try searching again.</p>
+  {% endif %}
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".qty-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      const qtySpan = document.getElementById(`qty-${id}`);
+      let qty = parseInt(qtySpan.textContent);
+      if (btn.classList.contains("plus")) qty++;
+      else if (btn.classList.contains("minus") && qty > 1) qty--;
+      qtySpan.textContent = qty;
+    });
+  });
+
+  document.querySelectorAll(".add-to-cart").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      const name = btn.dataset.name;
+      const price = parseFloat(btn.dataset.price);
+      const qty = parseInt(document.getElementById(`qty-${id}`).textContent);
+      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const existing = cart.find((i) => i.id === id);
+      if (existing) existing.qty += qty;
+      else cart.push({ id, name, price, qty });
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert(`${name} (x${qty}) added to cart!`);
+    });
+  });
+});
+</script>
+{% endblock %}

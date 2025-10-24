@@ -1,0 +1,79 @@
+{% extends "base.html" %} {% block content %}
+<div class="admin-dashboard-container">
+  <h2 class="mb-4">Admin Dashboard: Order Management</h2>
+
+  {% if orders %}
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Item Name</th>
+          <th>Buyer</th>
+          <th>Seller</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td><code>{{ order.order_id }}</code></td>
+          <td>{{ order.item_name }}</td>
+          <td>{{ order.buyer_name }}</td>
+          <td>{{ order.seller_name }}</td>
+          <td>
+            <span
+              class="order-status status-{{ order.order_status|replace(' ', '_')|lower }}"
+            >
+              {{ order.order_status|replace('_', ' ')|capitalize }}
+            </span>
+          </td>
+          <td>
+            <!-- Action depends on the order's current status -->
+            {% if order.order_status == 'pending' %}
+            <form
+              action="{{ url_for('admin_mark_received_by_warehouse') }}"
+              method="POST"
+            >
+              <input
+                type="hidden"
+                name="order_id"
+                value="{{ order.order_id }}"
+              />
+              <button type="submit" class="btn btn-sm">Mark as Received</button>
+            </form>
+            {% elif order.order_status == 'in_transit' %}
+            <form
+              action="{{ url_for('admin_complete_order') }}"
+              method="POST"
+              class="d-flex gap-2"
+            >
+              <input
+                type="hidden"
+                name="order_id"
+                value="{{ order.order_id }}"
+              />
+              <input
+                type="text"
+                name="otp"
+                class="form-control form-control-sm"
+                placeholder="Enter OTP"
+                required
+              />
+              <button type="submit" class="btn btn-sm">Complete</button>
+            </form>
+            {% else %}
+            <span class="text-muted">No action required</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted">There are no ongoing orders to manage.</p>
+  {% endif %}
+</div>
+{% endblock %}

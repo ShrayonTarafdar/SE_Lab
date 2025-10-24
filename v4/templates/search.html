@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="search-container">
+  <h2 class="mb-4">🔍 Search Items</h2>
+
+  <!-- SEARCH BAR -->
+  <form method="get" action="{{ url_for('search') }}" class="search-form">
+    <div class="search-bar">
+      <input
+        type="text"
+        id="search-input"
+        name="q"
+        placeholder="Search items..."
+        value="{{ query or '' }}"
+      />
+      <select id="filter-category" name="cat">
+        <option value="" {% if not selected_cat %}selected{% endif %}>All Categories</option>
+        <option value="Books" {% if selected_cat == 'Books' %}selected{% endif %}>Books</option>
+        <option value="Electronics" {% if selected_cat == 'Electronics' %}selected{% endif %}>Electronics</option>
+        <option value="Stationery" {% if selected_cat == 'Stationery' %}selected{% endif %}>Stationery</option>
+        <option value="Furniture" {% if selected_cat == 'Furniture' %}selected{% endif %}>Furniture</option>
+        <option value="Miscellaneous" {% if selected_cat == 'Miscellaneous' %}selected{% endif %}>Miscellaneous</option>
+      </select>
+      <button type="submit" class="btn">Search</button>
+    </div>
+  </form>
+
+  {% if items and items|length > 0 %}
+  <div class="card-grid mt-4">
+    {% for item in items %}
+    <div class="card item-card" data-id="{{ item.item_id }}" data-name="{{ item.name }}" data-price="{{ item.price }}">
+      <img src="{{ url_for('static', filename=item.image_url) if item.image_url else url_for('static', filename='images/banners/banner1.jpg') }}" alt="{{ item.name }}">
+      <div class="card-content">
+        <h4>{{ item.name }}</h4>
+        <p class="text-muted">{{ item.category }}</p>
+        <p>{{ item.description or '' }}</p>
+        <p class="card-price">₹{{ "%.2f"|format(item.price) }}</p>
+        <p class="small text-muted">Available: {{ item.quantity }}</p>
+
+        <!-- FIX: Add data-max-quantity to the container -->
+        <div class="qty-control" data-max-quantity="{{ item.quantity }}">
+          <button class="qty-btn minus" data-id="{{ item.item_id }}">-</button>
+          <span class="qty-count" id="qty-{{ item.item_id }}">1</span>
+          <button class="qty-btn plus" data-id="{{ item.item_id }}">+</button>
+        </div>
+        <button class="btn add-to-cart mt-2" data-id="{{ item.item_id }}" data-name="{{ item.name }}" data-price="{{ item.price }}">
+          Add to Cart
+        </button>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted mt-4">No items found. Try searching again.</p>
+  {% endif %}
+</div>
+{% endblock %}

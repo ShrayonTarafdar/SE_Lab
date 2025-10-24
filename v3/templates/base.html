@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CampusKart</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div style="display: flex; min-height: 100vh; width: 100%">
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <div class="logo">CampusKart</div>
+        <nav class="nav-menu">
+          <a href="{{ url_for('home') }}">Home</a>
+          <a href="{{ url_for('search') }}">Search</a>
+          <a href="{{ url_for('sell') }}">Sell</a>
+          <a href="{{ url_for('cart_page') }}">Cart</a>
+          <a href="{{ url_for('orders') }}">My Orders</a>
+          <a href="{{ url_for('profile') }}">Profile</a>
+
+          <!-- NEW: Admin Button -->
+          <a href="#" id="admin-button">Admin Panel</a>
+
+          <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+        </nav>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <main class="main-content">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %} {% endwith %} {% block content %}
+        <!-- Page-specific content will be inserted here -->
+        {% endblock %}
+      </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    {% block scripts %}{% endblock %}
+
+    <script>
+      // NEW: JavaScript for the admin password prompt
+      document
+        .getElementById("admin-button")
+        .addEventListener("click", function (event) {
+          event.preventDefault();
+          const password = prompt("Please enter the admin password:");
+
+          // This is the hardcoded password the examiner can test with.
+          const ADMIN_PASSWORD = "admin";
+
+          if (password === ADMIN_PASSWORD) {
+            // If the password is correct, redirect to the admin page.
+            window.location.href = "{{ url_for('admin_dashboard') }}";
+          } else if (password) {
+            // if they entered something but it was wrong
+            alert("Incorrect password.");
+          }
+        });
+    </script>
+  </body>
+</html>

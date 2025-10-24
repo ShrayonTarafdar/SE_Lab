@@ -1,24 +1,32 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}  {# Extend base layout (sidebar, header, CSS, JS) #}
 
-<!-- Hide sidebar on login -->
+{% block content %}
+
+<!-- ================== PAGE STYLING ================== -->
 <style>
+  /* Hide sidebar for login/signup page */
   .sidebar {
-    display: none !important;
+    display: none !important; /* Override base sidebar display */
   }
+
+  /* Center main content vertically and horizontally */
   .main-content {
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    min-height: 100vh; /* Full viewport height */
   }
 </style>
 
+<!-- ================== LOGIN / SIGNUP CARD ================== -->
 <div class="login-card-coffee">
+  <!-- Page heading -->
   <h2 class="mb-4 text-center">☕ CampusKart Login</h2>
 
-  <!-- LOGIN -->
+  <!-- ================== LOGIN FORM ================== -->
   <form action="{{ url_for('login') }}" method="POST" class="needs-validation">
+    <!-- Email input -->
     <label for="email" class="form-label-coffee">Email</label>
     <input
       type="email"
@@ -28,6 +36,7 @@
       required
     />
 
+    <!-- Password input -->
     <label for="password" class="form-label-coffee">Password</label>
     <input
       type="password"
@@ -37,16 +46,20 @@
       required
     />
 
+    <!-- Submit button -->
     <button type="submit" class="btn w-100 mt-3">Login</button>
   </form>
 
+  <!-- Divider between login and signup -->
   <div class="divider-coffee">OR</div>
 
-  <!-- SIGNUP -->
+  <!-- ================== SIGNUP FORM ================== -->
   <form action="{{ url_for('signup') }}" method="POST" class="needs-validation">
+    <!-- Name input -->
     <label for="name" class="form-label-coffee">Name</label>
     <input type="text" id="name" name="name" placeholder="Your name" required />
 
+    <!-- Email input -->
     <label for="email2" class="form-label-coffee">Email</label>
     <input
       type="email"
@@ -56,6 +69,7 @@
       required
     />
 
+    <!-- Password input -->
     <label for="password2" class="form-label-coffee">Password</label>
     <input
       type="password"
@@ -65,7 +79,9 @@
       required
     />
 
+    <!-- Submit button -->
     <button type="submit" class="btn w-100 mt-3">Sign Up</button>
   </form>
 </div>
+
 {% endblock %}

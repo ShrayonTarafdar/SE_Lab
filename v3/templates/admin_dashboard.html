@@ -1,9 +1,14 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}  {# Inherit from the base template for consistent layout and styles #}
+
+{% block content %}
 <div class="admin-dashboard-container">
+  <!-- Dashboard heading -->
   <h2 class="mb-4">Admin Dashboard: Order Management</h2>
 
+  {# Check if there are any orders to display #}
   {% if orders %}
   <div class="table-responsive">
+    <!-- Orders table -->
     <table class="table table-striped table-hover">
       <thead>
         <tr>
@@ -16,12 +21,20 @@
         </tr>
       </thead>
       <tbody>
+        {# Loop through each order and display its details #}
         {% for order in orders %}
         <tr>
+          <!-- Display order ID in code style -->
           <td><code>{{ order.order_id }}</code></td>
+
+          <!-- Display item name -->
           <td>{{ order.item_name }}</td>
+
+          <!-- Display buyer and seller names -->
           <td>{{ order.buyer_name }}</td>
           <td>{{ order.seller_name }}</td>
+
+          <!-- Display order status with dynamic CSS class for styling -->
           <td>
             <span
               class="order-status status-{{ order.order_status|replace(' ', '_')|lower }}"
@@ -29,9 +42,11 @@
               {{ order.order_status|replace('_', ' ')|capitalize }}
             </span>
           </td>
+
+          <!-- Display action buttons based on order status -->
           <td>
-            <!-- Action depends on the order's current status -->
             {% if order.order_status == 'pending' %}
+            <!-- If the order is pending, allow admin to mark as received -->
             <form
               action="{{ url_for('admin_mark_received_by_warehouse') }}"
               method="POST"
@@ -43,7 +58,9 @@
               />
               <button type="submit" class="btn btn-sm">Mark as Received</button>
             </form>
+
             {% elif order.order_status == 'in_transit' %}
+            <!-- If the order is in transit, allow admin to complete it using OTP -->
             <form
               action="{{ url_for('admin_complete_order') }}"
               method="POST"
@@ -54,6 +71,7 @@
                 name="order_id"
                 value="{{ order.order_id }}"
               />
+              <!-- OTP input required to complete the order -->
               <input
                 type="text"
                 name="otp"
@@ -63,7 +81,9 @@
               />
               <button type="submit" class="btn btn-sm">Complete</button>
             </form>
+
             {% else %}
+            <!-- For all other statuses, no action is required -->
             <span class="text-muted">No action required</span>
             {% endif %}
           </td>
@@ -72,7 +92,9 @@
       </tbody>
     </table>
   </div>
+
   {% else %}
+  <!-- If there are no orders, show a friendly message -->
   <p class="text-muted">There are no ongoing orders to manage.</p>
   {% endif %}
 </div>

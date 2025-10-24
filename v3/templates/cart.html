@@ -1,13 +1,16 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}  {# Inherit from the base template (layout, CSS, JS, sidebar) #}
+
+{% block content %}
 <div class="cart-container">
+  <!-- Page heading -->
   <h2 class="mb-4 text-center">🛒 Your Cart</h2>
 
-  <!-- CART ITEMS -->
+  <!-- ================== CART ITEMS ================== -->
   <div id="cart-items">
-    <!-- Populated dynamically via scripts.js -->
+    <!-- Cart items will be dynamically populated via JavaScript -->
   </div>
 
-  <!-- TOTAL + CHECKOUT -->
+  <!-- ================== CART SUMMARY / TOTAL ================== -->
   <div class="cart-summary mt-4 text-end">
     <h4>Total: <span id="cart-total">₹0.00</span></h4>
     <button id="checkout-btn" class="btn mt-3">Proceed to Checkout</button>
@@ -16,88 +19,112 @@
 
 <script>
   /* =======================================================
-   CART PAGE FRONTEND LOGIC
-   - Load items from localStorage
-   - Display items dynamically
-   - Handle qty +/-, remove, and total updates
-   ======================================================= */
+     CART PAGE FRONTEND LOGIC
+     - Load cart items from localStorage
+     - Dynamically render items on the page
+     - Handle quantity increment/decrement
+     - Handle item removal
+     - Update total amount dynamically
+  ======================================================= */
 
+  // Ensure DOM is fully loaded before running scripts
   document.addEventListener("DOMContentLoaded", () => {
-    const cartContainer = document.getElementById("cart-items");
-    const totalSpan = document.getElementById("cart-total");
+    const cartContainer = document.getElementById("cart-items"); // Container to render cart items
+    const totalSpan = document.getElementById("cart-total"); // Element to display total amount
 
+    // Retrieve cart data from localStorage (or initialize empty array if none)
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
+    // If cart is empty, display a friendly message with a link to browse items
     if (cart.length === 0) {
       cartContainer.innerHTML = `
       <div class="text-center mt-4">
         <p>Your cart is empty.</p>
         <a href="{{ url_for('home') }}" class="btn mt-3">Browse Items</a>
       </div>`;
-      totalSpan.textContent = "₹0.00";
-      return;
+      totalSpan.textContent = "₹0.00"; // Set total to 0
+      return; // Exit script
     }
 
-    // Render cart items
-    let total = 0;
+    // ================== Render Cart Items ==================
+    let total = 0; // Initialize total amount
     cartContainer.innerHTML = cart
       .map((item) => {
-        const subtotal = item.price * item.qty;
-        total += subtotal;
+        const subtotal = item.price * item.qty; // Calculate subtotal for each item
+        total += subtotal; // Add to total
+
+        // Return HTML string for each cart item
         return `
       <div class="cart-item" data-id="${item.id}">
         <div class="d-flex align-items-center" style="gap:1rem;">
+          <!-- Product image -->
           <img src="/static/images/banners/banner1.jpg" alt="${item.name}">
           <div>
+            <!-- Product name and price -->
             <h5>${item.name}</h5>
             <p class="text-muted mb-0">₹${item.price.toFixed(2)} each</p>
           </div>
         </div>
 
+        <!-- Quantity controls -->
         <div class="qty-controls">
           <button class="qty-btn qty-minus" data-id="${item.id}">−</button>
           <span>${item.qty}</span>
           <button class="qty-btn qty-plus" data-id="${item.id}">+</button>
         </div>
 
+        <!-- Subtotal for this item -->
         <div>
           <strong>₹${subtotal.toFixed(2)}</strong>
         </div>
 
-        <button class="btn-outline remove-item" data-id="${
-          item.id
-        }">Remove</button>
+        <!-- Remove item button -->
+        <button class="btn-outline remove-item" data-id="${item.id}">Remove</button>
       </div>
     `;
       })
-      .join("");
+      .join(""); // Join all items as a single string
 
+    // Update total displayed
     totalSpan.textContent = "₹" + total.toFixed(2);
 
-    // Quantity controls
+    // ================== Quantity Controls ==================
+    // Increment quantity
     document.querySelectorAll(".qty-plus").forEach((btn) => {
       btn.addEventListener("click", () => updateQty(btn.dataset.id, 1));
     });
+
+    // Decrement quantity
     document.querySelectorAll(".qty-minus").forEach((btn) => {
       btn.addEventListener("click", () => updateQty(btn.dataset.id, -1));
     });
 
-    // Remove buttons
+    // ================== Remove Item Buttons ==================
     document.querySelectorAll(".remove-item").forEach((btn) => {
       btn.addEventListener("click", () => {
         const id = btn.dataset.id;
+        // Filter out the removed item from cart array
         cart = cart.filter((item) => item.id !== id);
+        // Save updated cart to localStorage
         localStorage.setItem("cart", JSON.stringify(cart));
+        // Reload page to reflect changes
         location.reload();
       });
     });
 
-    // Quantity update function
+    // ================== Update Quantity Function ==================
     function updateQty(id, delta) {
+      // Find item in cart by id
       const item = cart.find((i) => i.id === id);
       if (!item) return;
+
+      // Update quantity (minimum 1)
       item.qty = Math.max(1, item.qty + delta);
+
+      // Save updated cart to localStorage
       localStorage.setItem("cart", JSON.stringify(cart));
+
+      // Reload page to reflect updated quantity and subtotal
       location.reload();
     }
   });

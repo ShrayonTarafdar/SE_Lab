@@ -1,58 +1,73 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}  {# Extend base template for layout, CSS, and sidebar #}
+
+{% block content %}
+
+<!-- ================== STYLES ================== -->
 <style>
+  /* Style for cancelled orders */
   .status-cancelled {
-    color: #b71c1c;
-    font-weight: 600;
-    text-transform: capitalize;
+    color: #b71c1c;       /* Dark red color to indicate cancellation */
+    font-weight: 600;     /* Bold text */
+    text-transform: capitalize; /* Capitalize first letter */
   }
+
+  /* Style for OTP codes */
   .otp-code {
-    font-size: 1.5rem;
-    font-weight: bold;
-    letter-spacing: 3px;
-    color: #a47148;
+    font-size: 1.5rem;    /* Larger font for visibility */
+    font-weight: bold;     /* Bold text */
+    letter-spacing: 3px;  /* Spacing between digits for clarity */
+    color: #a47148;       /* Coffee-themed color */
   }
 </style>
+
 <div class="orders-container">
+  <!-- Page heading -->
   <h2 class="mb-4">📜 Your Orders</h2>
+
+  {# Check if user has any orders #}
   {% if orders and orders|length > 0 %}
   <div class="card-grid">
+    {# Loop through each order and display as a card #}
     {% for o in orders %}
     <div class="card">
       <div class="card-content">
+        <!-- Item name -->
         <h4>{{ o.item_name }}</h4>
+
+        <!-- Order ID -->
         <p>Order ID: <b>{{ o.order_id }}</b></p>
 
-        <!-- MODIFIED: Display the plaintext OTP if the order is not yet complete -->
+        <!-- Display OTP only if order is not completed or cancelled -->
         {% if o.status not in ['completed', 'cancelled'] %}
         <p>Your Pickup OTP: <span class="otp-code">{{ o.otp }}</span></p>
         {% endif %}
 
+        <!-- Price of the order -->
         <p>Price: ₹{{ "%.2f"|format(o.price) }}</p>
+
+        <!-- Order status with dynamic CSS class for styling -->
         <p>
           Status:
-          <span
-            class="order-status status-{{ o.status|replace(' ', '_')|lower }}"
-          >
+          <span class="order-status status-{{ o.status|replace(' ', '_')|lower }}">
             {{ o.status|replace('_', ' ')|capitalize }}
           </span>
         </p>
-        <small class="text-muted"
-          >Placed on {{ o.created_at.split(' ')[0] if o.created_at else 'N/A'
-          }}</small
-        >
 
+        <!-- Order creation date (display only date part) -->
+        <small class="text-muted">
+          Placed on {{ o.created_at.split(' ')[0] if o.created_at else 'N/A' }}
+        </small>
+
+        <!-- Mark Received button: only shown for in_transit or ready_for_pickup orders -->
         {% if o.status in ['in_transit', 'ready_for_pickup'] %}
-        <button
-          class="btn mt-3 btn-mark-received"
-          data-order-id="{{ o.order_id }}"
-        >
+        <button class="btn mt-3 btn-mark-received" data-order-id="{{ o.order_id }}">
           Mark Received
         </button>
-        {% endif %} {% if o.status not in ['completed', 'cancelled'] %}
-        <button
-          class="btn btn-outline mt-3 btn-cancel-order"
-          data-order-id="{{ o.order_id }}"
-        >
+        {% endif %}
+
+        <!-- Cancel Order button: shown for orders not completed or cancelled -->
+        {% if o.status not in ['completed', 'cancelled'] %}
+        <button class="btn btn-outline mt-3 btn-cancel-order" data-order-id="{{ o.order_id }}">
           Cancel Order
         </button>
         {% endif %}
@@ -60,8 +75,11 @@
     </div>
     {% endfor %}
   </div>
+
   {% else %}
+  <!-- Message shown if user has no orders -->
   <p class="text-muted">No orders yet.</p>
   {% endif %}
 </div>
+
 {% endblock %}
